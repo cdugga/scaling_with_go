@@ -1,0 +1,14 @@
+# connect to pod and run redis-cli commands
+>k exec -it redis-master -- /bin/sh
+>redis-cli
+>INFO
+
+# LIST all keys
+KEYS --all
+
+# SET value
+>MSET firstname c lastname dugga
+>KEYS *firstname^
+
+# GET value
+>MGET firstname
