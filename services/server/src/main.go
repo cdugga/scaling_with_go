@@ -6,6 +6,10 @@ import (
 	"net/http"
 )
 
+func main(){
+	StartServer()
+}
+
 func StartServer() {
 
 	fmt.Println("Starting server")
