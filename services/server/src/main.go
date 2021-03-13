@@ -6,7 +6,9 @@ import (
 	"net/http"
 )
 
-func main() {
+func StartServer() {
+
+	fmt.Println("Starting server")
 
 	http.HandleFunc("/", Handler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
