@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	gohandlers "github.com/gorilla/handlers"
@@ -19,7 +20,6 @@ const (
 )
 
 func main(){
-	RedisTest()
 	StartServer()
 }
 
@@ -27,19 +27,22 @@ var ctx = context.Background()
 
 func RedisConnection() *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr:     "redis-master:6379",
+		//Addr:     "redis-master:6379",
+		Addr: "localhost:6379",
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
 }
 
 
-func RedisTest(){
+func WriteKeyHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("Connecting to Redis")
 	rdb := RedisConnection()
 
-	err := rdb.Set(ctx, "key", "value", 0).Err()
+	keyvalue := r.Context().Value(KeyValue{}).(*KeyValue)
+
+	err := rdb.Set(ctx, keyvalue.Key, keyvalue.Value, 0).Err()
 	if err != nil {
 		panic(err)
 	}
@@ -90,6 +93,10 @@ func StartServer() {
 	getKeyRouter := sm.Methods(http.MethodGet).Subrouter()
 	getKeyRouter.HandleFunc("/value/{key}", FetchKeyHandler)
 
+	writeKeyRouter := sm.Methods(http.MethodPost).Subrouter()
+	writeKeyRouter.HandleFunc("/key", WriteKeyHandler)
+	writeKeyRouter.Use(MiddleWareProductValidation)
+
 	//CORS header
 	ch := gohandlers.CORS(gohandlers.AllowedOrigins([]string{"http://localhost:3000"}))
 
@@ -121,4 +128,33 @@ func StartServer() {
 
 }
 
+type KeyValue struct {
+	Key string `json:"key"`
+	Value string `json:"value"`
+}
+
+func MiddleWareProductValidation(next http.Handler) http.Handler{
+
+	return http.HandlerFunc(func(rw http.ResponseWriter, r*http.Request) {
+
+		keyVal := &KeyValue{}
+
+		e := json.NewDecoder(r.Body)
+		err := e.Decode(keyVal)
+
+		if err != nil {
+			log.Println("[Error] deserializing product", err)
+			http.Error(rw, "Error reading product", http.StatusBadRequest)
+			return
+		}
+
+		// add key value to the context
+		ctx := context.WithValue(r.Context(), KeyValue{}, keyVal)
+		req := r.WithContext(ctx)
+
+		// call the next handler, which can be another middleware in the chain, or the final handler
+		next.ServeHTTP(rw,req)
+
+	})
+}
 
