@@ -16,6 +16,7 @@ spec:
     spec:
       containers:
         - name: swg-redis-client
-          image: cdugga/scaling-with-go-redisclient:1.0.0
+          image: cdugga/scaling-with-go-redisclient:1.0.3
+          imagePullPolicy: Always
           ports:
             - containerPort: 81

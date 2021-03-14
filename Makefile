@@ -19,13 +19,15 @@ deploy_redis_master:
 
 build_redisclient_image:
 	cd services/redis-client/src; \
-	go mod init github.com/cdugga/scaling_with_go/server ;\
+	go mod init github.com/cdugga/scaling_with_go/redisclient ;\
 	cd ..; \
-	docker build -t cdugga/scaling-with-go-redisclient:1.0.0 .;
+	docker build -t cdugga/scaling-with-go-redisclient:1.0.3 .;
 start_redisclient_image:
-	docker run -p 8081:8080 -it cdugga/scaling-with-go-redisclient:1.0.0 ;
+	docker run -p 8081:8080 -it cdugga/scaling-with-go-redisclient:1.0.3 ;
 push_redisclient_image:
-	docker push cdugga/scaling-with-go-redisclient ;
+	docker push cdugga/scaling-with-go-redisclient:1.0.3 ;
 deploy_redisclient_image_k8s:
 	cd services/redis-client/; \
 	kubectl create -f deployment.yaml
+
+redisclient_all: build_redisclient_image push_redisclient_image deploy_redisclient_image_k8s
