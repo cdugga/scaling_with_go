@@ -11,6 +11,9 @@ Local development environment
 * Kafka
 
 
+Testing
+* Miniredis
+
 ---
 Setup
 

@@ -1,27 +1,41 @@
 package main
 
-//func TestHandler(t *testing.T) {
-//
-//	req, err := http.NewRequest("GET", "/", nil)
-//
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	rr := httptest.NewRecorder()
-//	handler := http.HandlerFunc(Handler)
-//	handler.ServeHTTP(rr, req)
-//
-//	if status := rr.Code; status != http.StatusOK {
-//		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
-//	}
-//
-//	expected := "Hello from the other side/"
-//	if rr.Body.String() != expected {
-//		t.Errorf("handler retruned unexpected body: got %v want %v", rr.Body.String(), expected)
-//	}
-//
-//}
+import (
+	"fmt"
+	"github.com/gorilla/mux"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestHandler(t *testing.T) {
+
+	path := fmt.Sprintf("/value/%s", "name")
+
+	req, err := http.NewRequest("GET", path, nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+
+	router := mux.NewRouter()
+	router.HandleFunc("/value/{key}", FetchKeyHandler)
+	router.ServeHTTP(rr, req)
+
+
+	if rr.Code != http.StatusOK {
+		t.Errorf("handler should have failed : got %v want %v",
+			rr.Code, http.StatusOK)
+	}
+
+	expected := "Requested value colin"
+	if rr.Body.String() != expected {
+		t.Errorf("handler retruned unexpected body: got %v want %v", rr.Body.String(), expected)
+	}
+
+}
 
 
 
