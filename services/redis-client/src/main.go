@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	gohandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -18,6 +20,10 @@ import (
 const (
 	PORT=8081
 )
+
+//go:embed templates
+var embededFiles embed.FS
+
 
 func main(){
 	StartServer()
@@ -54,9 +60,14 @@ func WriteKeyHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("key", val)
 }
 
-func AddKeyHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, "Hello from the other side", r.URL.Path)
+func getFileSystem() http.FileSystem{
+	log.Print("using embed mode")
+	fsys, err := fs.Sub(embededFiles, "templates")
+	if err != nil {
+		panic(err)
+	}
+
+	return http.FS(fsys)
 }
 
 
@@ -87,14 +98,14 @@ func StartServer() {
 	sm := mux.NewRouter()
 
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/", AddKeyHandler)
+	getRouter.Handle("/", http.FileServer(getFileSystem()))
 
 
 	getKeyRouter := sm.Methods(http.MethodGet).Subrouter()
 	getKeyRouter.HandleFunc("/value/{key}", FetchKeyHandler)
 
 	writeKeyRouter := sm.Methods(http.MethodPost).Subrouter()
-	writeKeyRouter.HandleFunc("/key", WriteKeyHandler)
+	writeKeyRouter.HandleFunc("/keyvalue", WriteKeyHandler)
 	writeKeyRouter.Use(MiddleWareProductValidation)
 
 	//CORS header

@@ -7,6 +7,7 @@ Local development environment
 * Kind
 * Docker
 * Golang
+* Redis
 * Kafka
 
 
