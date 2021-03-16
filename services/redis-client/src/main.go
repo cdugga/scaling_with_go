@@ -31,13 +31,42 @@ func main(){
 
 var ctx = context.Background()
 
-func RedisConnection() *redis.Client {
-	return redis.NewClient(&redis.Options{
-		//Addr:     "redis-master:6379",
-		Addr: "localhost:6379",
+type Repository interface {
+	Set(key string, value interface{}, exp time.Duration) error
+	Get(key string) (string, error)
+}
+
+type repository struct {
+	Client redis.Cmdable
+}
+
+func NewRedisRepository(Client redis.Cmdable) Repository{
+	return &repository{Client}
+}
+
+
+// Set attaches the redis repository and set the data
+func (r *repository) Set(key string, value interface{}, exp time.Duration) error {
+	return r.Client.Set(ctx,key, value, exp).Err()
+}
+
+// Get attaches the redis repository and get the data
+func (r *repository) Get(key string) (string, error) {
+	get := r.Client.Get(ctx,key)
+	return get.Result()
+}
+
+
+
+func RedisConnection() Repository {
+
+	return NewRedisRepository(redis.NewClient(&redis.Options{
+		Addr:     "redis-master:6379",
+		//Addr: "localhost:6379",
 		Password: "", // no password set
 		DB:       0,  // use default DB
-	})
+	}))
+
 }
 
 
@@ -48,12 +77,12 @@ func WriteKeyHandler(w http.ResponseWriter, r *http.Request) {
 
 	keyvalue := r.Context().Value(KeyValue{}).(*KeyValue)
 
-	err := rdb.Set(ctx, keyvalue.Key, keyvalue.Value, 0).Err()
+	err := rdb.Set(keyvalue.Key, keyvalue.Value, 0)
 	if err != nil {
 		panic(err)
 	}
 
-	val, err := rdb.Get(ctx, "key").Result()
+	val, err := rdb.Get("key")
 	if err != nil {
 		panic(err)
 	}
@@ -83,7 +112,7 @@ func FetchKeyHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Fetching key %s" , key)
 
-	val, err1 := RedisConnection().Get(ctx, key).Result()
+	val, err1 := RedisConnection().Get(key)
 	if err1 != nil {
 		panic(err1)
 	}

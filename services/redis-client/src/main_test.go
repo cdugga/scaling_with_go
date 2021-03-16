@@ -6,9 +6,18 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"github.com/alicebob/miniredis/v2"
 )
 
 func TestHandler(t *testing.T) {
+
+	s, err := miniredis.Run()
+	if err != nil {
+		panic(err)
+	}
+	s.Set("name", "colin")
+
+	defer s.Close()
 
 	path := fmt.Sprintf("/value/%s", "name")
 
