@@ -27,15 +27,24 @@ func ScrapeHTML() {
 
 	c :=  colly.NewCollector( )
 
-	c.OnHTML("table tbody tr", func(e *colly.HTMLElement) {
-		e.ForEach("td.els", func(_ int, row *colly.HTMLElement) {
+	c.OnHTML("td[onclick].els", func(e *colly.HTMLElement) {
 
-			//if row.Attr("class") == ".elw2ph" || row.Attr("class") == ".els elw2ph" {
-			//	fmt.Println("Stuff" ,e.Text)
-			fmt.Println("Class..." , e.ChildText(("els")))
-			//}
+		exists := e.Attr("class") == "els"
 
-		})
+		if  exists {
+			fmt.Println("table..." , e.Text)
+		}
+
+	})
+
+	// Before making a request print "Visiting ..."
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println("Visiting", r.URL.String())
+	})
+
+	// Set error handler
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
 	})
 
 	c.Visit("https://www.bridgewebs.com/cgi-bin/bwoo/bw.cgi?club=bridgeclublive&pid=display_past")

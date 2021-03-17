@@ -31,3 +31,11 @@ deploy_redisclient_image_k8s:
 	kubectl create -f deployment.yaml
 
 redisclient_all: build_redisclient_image push_redisclient_image deploy_redisclient_image_k8s
+
+prometheus_build:
+	cd services/prometheus; \
+	docker build -t cdugga/scaling-with-go-prometheus:1.0.0;
+prometheus_deploy: prometheus_build
+	cd services/prometheus; \
+	docker push cdugga/scaling_with_go/prometheus:1.0.0;
+

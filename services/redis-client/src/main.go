@@ -61,8 +61,8 @@ func (r *repository) Get(key string) (string, error) {
 func RedisConnection() Repository {
 
 	return NewRedisRepository(redis.NewClient(&redis.Options{
-		Addr:     "redis-master:6379",
-		//Addr: "localhost:6379",
+		//Addr:     "redis-master:6379",
+		Addr: "localhost:6379",
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	}))
