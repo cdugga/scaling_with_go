@@ -1,19 +1,33 @@
-# scaling_with_go
+# Scaling with Go
 Scaling microservices with Golang
 
 ---
-Local development environment
 
-* Kind
-* Docker
-* Golang
-* Redis
-* Kafka
+scaling_with_go is an experimental project which explores the patterns and tools used to build highly scalable microservices.
 
-
-Testing
-* Miniredis
+# Featured Integrations
 
 ---
-Setup
+
+* Kubernetes
+* Redis
+* Prometheus
+* kafka
+
+
+# Installation
+
+---
+Build and deploy instructions for all modules are available in a Makefile located at the project root. 
+
+```
+# deploy all K8s objects
+make k8s_deploy_all
+
+# tear down all K8s objects
+make teardown
+
+```
+
+
 
