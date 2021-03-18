@@ -14,7 +14,10 @@ import (
 	"os"
 	"os/signal"
 	"time"
-)
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	)
 
 
 const (
@@ -25,7 +28,24 @@ const (
 var embededFiles embed.FS
 
 
+func recordMetrics() {
+	go func() {
+		for {
+			opsProcessed.Inc()
+			time.Sleep(2 * time.Second)
+		}
+	}()
+}
+
+var (
+	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "redisclient_processed_ops_total",
+		Help: "The total number of processed events",
+	})
+)
+
 func main(){
+	recordMetrics()
 	StartServer()
 }
 
@@ -125,6 +145,9 @@ func StartServer() {
 
 	log.Printf("Staring server on port %d ", PORT )
 	sm := mux.NewRouter()
+
+	promHandler := sm.Methods(http.MethodGet).Subrouter()
+	promHandler.Handle("/metrics", promhttp.Handler())
 
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
 	getRouter.Handle("/", http.FileServer(getFileSystem()))
