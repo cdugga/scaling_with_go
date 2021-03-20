@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -38,6 +39,14 @@ func recordMetrics() {
 }
 
 
+var responseStatus = prometheus.NewCounterVec(
+	prometheus.CounterOpts{
+		Name: "response_status",
+		Help: "Status of HTTP response",
+	},
+	[]string{"status"},
+)
+
 var totalRequests = prometheus.NewCounterVec(
 	prometheus.CounterOpts{
 	Name: "http_requests_total",
@@ -52,6 +61,11 @@ var (
 		Help: "The total number of processed events",
 	})
 )
+
+var httpDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
+	Name: "http_response_time_seconds",
+	Help: "Duration of HTTP requests.",
+}, []string{"path"})
 
 func main(){
 	recordMetrics()
@@ -210,13 +224,34 @@ type KeyValue struct {
 func PrometheusMiddleWare(next http.Handler) http.Handler{
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request){
 
+		route := mux.CurrentRoute(r)
+		path, _ := route.GetPathTemplate()
+
+		timer := prometheus.NewTimer(httpDuration.WithLabelValues(path))
+		w := NewResponseWriter(rw)
 		next.ServeHTTP(rw, r)
+
+		statusCode := w.statusCode
+		responseStatus.WithLabelValues(strconv.Itoa(statusCode)).Inc()
 		totalRequests.WithLabelValues(r.RequestURI).Inc()
+		timer.ObserveDuration()
 	})
 }
 
 func init(){
 	prometheus.Register(totalRequests)
+	prometheus.Register(responseStatus)
+	prometheus.Register(httpDuration)
+}
+
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+
+func NewResponseWriter(w http.ResponseWriter) *responseWriter {
+	return &responseWriter{w, http.StatusOK}
 }
 
 func MiddleWareProductValidation(next http.Handler) http.Handler{
@@ -237,6 +272,8 @@ func MiddleWareProductValidation(next http.Handler) http.Handler{
 		// add key value to the context
 		ctx := context.WithValue(r.Context(), KeyValue{}, keyVal)
 		req := r.WithContext(ctx)
+
+
 
 		// call the next handler, which can be another middleware in the chain, or the final handler
 		next.ServeHTTP(rw,req)
