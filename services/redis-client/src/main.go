@@ -37,6 +37,15 @@ func recordMetrics() {
 	}()
 }
 
+
+var totalRequests = prometheus.NewCounterVec(
+	prometheus.CounterOpts{
+	Name: "http_requests_total",
+	Help: "Number of requests",
+	},
+	[]string{"path"},
+	)
+
 var (
 	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "redisclient_processed_ops_total",
@@ -81,8 +90,8 @@ func (r *repository) Get(key string) (string, error) {
 func RedisConnection() Repository {
 
 	return NewRedisRepository(redis.NewClient(&redis.Options{
-		//Addr:     "redis-master:6379",
-		Addr: "localhost:6379",
+		Addr:     "redis-master:6379",
+		//Addr: "localhost:6379",
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	}))
@@ -145,9 +154,11 @@ func StartServer() {
 
 	log.Printf("Staring server on port %d ", PORT )
 	sm := mux.NewRouter()
+	sm.Use(PrometheusMiddleWare)
 
 	promHandler := sm.Methods(http.MethodGet).Subrouter()
 	promHandler.Handle("/metrics", promhttp.Handler())
+
 
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
 	getRouter.Handle("/", http.FileServer(getFileSystem()))
@@ -194,6 +205,18 @@ func StartServer() {
 type KeyValue struct {
 	Key string `json:"key"`
 	Value string `json:"value"`
+}
+
+func PrometheusMiddleWare(next http.Handler) http.Handler{
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request){
+
+		next.ServeHTTP(rw, r)
+		totalRequests.WithLabelValues(r.RequestURI).Inc()
+	})
+}
+
+func init(){
+	prometheus.Register(totalRequests)
 }
 
 func MiddleWareProductValidation(next http.Handler) http.Handler{
