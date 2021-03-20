@@ -29,5 +29,10 @@ make teardown
 
 ```
 
+# Testing
 
+---
+
+* Miniredis
+* Hey CLI
 

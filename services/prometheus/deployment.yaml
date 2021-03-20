@@ -4,7 +4,6 @@ metadata:
   name: prometheus-deployment
   labels:
     app: prometheus
-    tier: backend
 spec:
   replicas: 1
   selector:
@@ -41,4 +40,4 @@ spec:
       targetPort: 9090
   selector:
     app: prometheus
-   tier: backend
+    tier: backend
