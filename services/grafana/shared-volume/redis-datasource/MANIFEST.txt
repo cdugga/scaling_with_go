@@ -1,0 +1,46 @@
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+{
+  "manifestVersion": "2.0.0",
+  "signatureType": "community",
+  "signedByOrg": "redis",
+  "signedByOrgName": "Redis Labs",
+  "plugin": "redis-datasource",
+  "version": "1.3.1",
+  "time": 1612507293587,
+  "keyId": "7e4d0c6a708866e7",
+  "files": {
+    "LICENSE": "d3cb3efc31b6781bc807cb4a6fd2042131fa3bdd7f96580c6df8fcbe1ff800d5",
+    "module.js": "9e44be814fb68e45e4c4a8c34c45faa3d50c1ad9a81d34724a210a7989083f99",
+    "redis-datasource_windows_amd64.exe": "a8ef5bf3fc761aad7dd0ec12eae453c603d05f058e7829c2f4bf7ec1ab31f3e3",
+    "dashboards/redis.json": "75c30849d35120e98320608648af967e77beed1e62e4b40b13fe13aecebddfd3",
+    "dashboards/redis-streaming.json": "16d252235c02b9b15b9634ea1289067b04f168444369ffef25f04d778bb860a4",
+    "module.js.map": "59ce766334042399914d3a44917938917a1f2ed5eae182f12aa81c95d8af2fc3",
+    "plugin.json": "ee2a3152ea9f0e3dad1ba3b61de5d7e46ec2ff50ed5edab3dab5581818b9b920",
+    "CHANGELOG.md": "49858b002b07bfff14fa227b865d03ba3990c46e40f282ac13ca74f80f731cb1",
+    "redis-datasource_linux_amd64": "f3f908002c948f1444580237515e3c6353fed738fc8686daf7a507a8d972c5ab",
+    "img/redis-dashboard.png": "e9220aa8a63906e15368178508c24931ab53a09b9eca85a8a2b756f1fa4b20ec",
+    "img/query.png": "ed3c449f1187ef543700e2ebf732e8f7c3fc506aea4ff57b04113a5e53335c93",
+    "img/logo.svg": "c028a9ef0daad71bb5ec74cd135dcacde4c7e0bf6ac6998b814b1f4bdd42a04c",
+    "img/variables.png": "810cebb76578731eb92d4b459ad807552eeaa31a732c75d20b0bdcc439d67174",
+    "img/datasource.png": "6277f240ebd853c0b4f37322ebf87821dd455c2ba236626f266b5f9526feb224",
+    "img/redis-streaming.png": "d373dbdef8131408e63230026b4be8e640a2b280e94e6d4d5fc8f6e91d689c68",
+    "redis-datasource_linux_arm64": "2b61154735a8bc39c5e0c30386c28e75f078007fab5ff84b84e29c3584ca756a",
+    "redis-datasource_linux_arm": "82b5a8fd0aab2945d28d5421f707ad55acf538de1dc3b71ba3923a16678d72f8",
+    "README.md": "8c764cea0d9c46277416380b7d1ca5508e041da2d2d6f9dd193933581aeee22d",
+    "module.js.LICENSE.txt": "0d8f66cd4afb566cb5b7e1540c68f43b939d3eba12ace290f18abc4f4cb53ed0",
+    "redis-datasource_darwin_amd64": "7bcedc9003eff677e29a5ba47bcb2f465931017dd05909068388cf14a100d613"
+  }
+}
+-----BEGIN PGP SIGNATURE-----
+Version: OpenPGP.js v4.10.1
+Comment: https://openpgpjs.org
+
+wqEEARMKAAYFAmAc6J0ACgkQfk0ManCIZudO5gII7X90zY8EeWsYvCGyoq6M
+jb1wV7yJaiMrRDht8XKciagRO2ytnAAGGkDf4QPAJ5ELufWinpsX4HNQO06j
+MEQ6QO4CCQF1Iyo/PFRX3t895uKo7m3G8QzaIYrEI9I/7SnHbVpkJx/ILuUe
+caf9G4+do5G1PlCfZ7boV8SMGWFTzCc6jjtbGg==
+=ALEp
+-----END PGP SIGNATURE-----

@@ -18,6 +18,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	 _ "net/http/pprof"
 	)
 
 
@@ -169,6 +170,8 @@ func StartServer() {
 	log.Printf("Staring server on port %d ", PORT )
 	sm := mux.NewRouter()
 	sm.Use(PrometheusMiddleWare)
+
+	sm.PathPrefix("/debug/").Handler(http.DefaultServeMux)
 
 	promHandler := sm.Methods(http.MethodGet).Subrouter()
 	promHandler.Handle("/metrics", promhttp.Handler())

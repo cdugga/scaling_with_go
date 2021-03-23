@@ -36,9 +36,14 @@ prometheus_deploy: prometheus_build
 deploy_prometheus_k8s:
 	cd services/prometheus; \
 	kubectl create -f deployment.yaml
+
+build_grafana-sv:
+	cd services/grafana/shared-volume; \
+	docker build -t cdugga/scaling-with-go-grafana-svolume:1.0.0 .;
 deploy_grafana_k8s:
 	cd services/grafana; \
 	kubectl create -f deployment.yml
+
 
 redisclient_all: build_redisclient_image push_redisclient_image deploy_redisclient_image_k8s
 prometheus_all: prometheus_deploy deploy_prometheus_k8s
@@ -46,12 +51,13 @@ prometheus_all: prometheus_deploy deploy_prometheus_k8s
 k8s_create_all: deploy_redis_master redisclient_all prometheus_all deploy_grafana_k8s
 
 delete_k8s_deployments:
-	kubectl delete deploy prometheus-deployment; \
+	kubectl delete deploy prometheus-main; \
 	kubectl delete deploy redisclient-deployment; \
 	kubectl delete deploy redis-master; \
 	kubectl delete deploy grafana;
 delete_k8s_services:
 	kubectl delete svc redis-client-svc; \
+	kubectl delete svc prometheus-main; \
 	kubectl delete svc redis-master;
 
 teardown: delete_k8s_services delete_k8s_deployments

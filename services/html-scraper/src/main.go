@@ -8,11 +8,17 @@ import (
 )
 
 func main(){
+	//b := LoadPage().Body
+	//
+	//r, _ := ioutil.ReadAll(b)
+
+	//fmt.Println(string(r))
+
 	ScrapeHTML()
 }
 
 func LoadPage() *http.Response {
-	url := "https://www.bridgewebs.com/cgi-bin/bwoo/bw.cgi?club=bridgeclublive&pid=display_past"
+	url := "https://www.donedeal.ie/cars-for-sale/honda-accord-2011/27264659"
 	resp, err := http.Get(url)
 
 	if err != nil {
@@ -25,17 +31,23 @@ func ScrapeHTML() {
 
 	log.Println("Scrape html")
 
-	c :=  colly.NewCollector( )
+	c :=  colly.NewCollector()
 
-	c.OnHTML("td[onclick].els", func(e *colly.HTMLElement) {
+	c.OnHTML("main script", func(e *colly.HTMLElement) {
 
-		exists := e.Attr("class") == "els"
 
-		if  exists {
-			fmt.Println("table..." , e.Text)
-		}
+		f := e.DOM.Find(".price")
+
+
+
+		fmt.Println("dsadasa" , f.Length())
+
+		//fmt.Println("Text" , e.Text)
+
+
 
 	})
+
 
 	// Before making a request print "Visiting ..."
 	c.OnRequest(func(r *colly.Request) {
@@ -47,5 +59,11 @@ func ScrapeHTML() {
 		fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
 	})
 
-	c.Visit("https://www.bridgewebs.com/cgi-bin/bwoo/bw.cgi?club=bridgeclublive&pid=display_past")
+	c.Visit("https://www.donedeal.ie/cars-for-sale/honda-accord-2011/27264659")
 }
+//
+//func traverseDIVTree(div *colly.HTMLElement) {
+//
+//	if div.
+//
+//}

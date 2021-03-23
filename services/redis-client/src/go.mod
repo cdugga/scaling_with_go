@@ -3,6 +3,7 @@ module github.com/cdugga/scaling_with_go/redisclient
 go 1.16
 
 require (
+	github.com/PuerkitoBio/goquery v1.6.1 // indirect
 	github.com/alicebob/miniredis/v2 v2.14.3
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-redis/redis/v8 v8.7.1

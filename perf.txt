@@ -1,0 +1,30 @@
+# load test endpoint using go-wkr
+
+go-wrk -d 5 http://localhost:8082/value/name
+
+go get -u github.com/google/pprof
+
+go tool pprof --seconds 5 http://localhost:8082/debug/pprof/profile
+ pprof> top 10
+ pprof> top 10 -cum
+
+
+# kill process on port
+sudo kill -9 `sudo lsof -t -i:6379`
+
+
+##Dashboards
+1. Golang debug
+http://localhost:8082/debug/pprof
+
+2. Redis Insight
+http://localhost:8001/
+
+3. Service home
+http://localhost:8082
+
+4. Prometheus dashboard
+http://localhost:9090
+
+5. Grafana dashboard
+http://localhost:3000/
