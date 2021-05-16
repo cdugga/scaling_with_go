@@ -17,9 +17,28 @@ spec:
         app: grafana
         tier: backend
     spec:
+      volumes:
+        - name: shared-data
+          emptyDir: { }
       containers:
+        - name: plugin-container
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 0
+          image: cdugga/scaling-with-go-grafana-svolume:1.0.0
+          volumeMounts:
+            - name: shared-data
+              mountPath: /shared-data
+          command: [ "/bin/sh" ]
+          args: [ "-c", "cp -R /plugins/redis-datasource /shared-data/redis-datasource;   while true; do sleep 30; done;" ]
         - name: grafana
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 0
           image: docker.io/grafana/grafana:5.4.3
+          volumeMounts:
+            - name: shared-data
+              mountPath: /plugins
           resources:
             requests:
               cpu: 100m

@@ -8,6 +8,13 @@ go tool pprof --seconds 5 http://localhost:8082/debug/pprof/profile
  pprof> top 10
  pprof> top 10 -cum
 
+# Visualizations
+go tool pprof -http=":8083"
+ (requires apt-get install graphviz gv)
+
+#
+curl -sK -v http://localhost:8083/debug/pprof/heap > heap.out
+go tool pprof -http=":8084" .\heap.out heap 
 
 # kill process on port
 sudo kill -9 `sudo lsof -t -i:6379`

@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/alicebob/miniredis/v2"
+	"github.com/cdugga/scaling_with_go/redisclient/handlers"
 	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"github.com/alicebob/miniredis/v2"
 )
 
 func TestHandler(t *testing.T) {
@@ -27,10 +28,11 @@ func TestHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
+
 	rr := httptest.NewRecorder()
 
 	router := mux.NewRouter()
-	router.HandleFunc("/value/{key}", FetchKeyHandler)
+	router.HandleFunc("/value/{key}", handlers.FetchKeyHandler)
 	router.ServeHTTP(rr, req)
 
 

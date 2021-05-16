@@ -5,26 +5,29 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"github.com/go-redis/redis/v8"
+	"github.com/cdugga/scaling_with_go/redisclient/data"
+	"github.com/cdugga/scaling_with_go/redisclient/handlers"
 	gohandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"io/fs"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"strconv"
 	"time"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	 _ "net/http/pprof"
-	)
+)
 
 
 const (
 	PORT=8081
 )
+
+
 
 //go:embed templates
 var embededFiles embed.FS
@@ -75,62 +78,8 @@ func main(){
 
 var ctx = context.Background()
 
-type Repository interface {
-	Set(key string, value interface{}, exp time.Duration) error
-	Get(key string) (string, error)
-}
-
-type repository struct {
-	Client redis.Cmdable
-}
-
-func NewRedisRepository(Client redis.Cmdable) Repository{
-	return &repository{Client}
-}
-
-
-// Set attaches the redis repository and set the data
-func (r *repository) Set(key string, value interface{}, exp time.Duration) error {
-	return r.Client.Set(ctx,key, value, exp).Err()
-}
-
-// Get attaches the redis repository and get the data
-func (r *repository) Get(key string) (string, error) {
-	get := r.Client.Get(ctx,key)
-	return get.Result()
-}
-
-
-
-func RedisConnection() Repository {
-
-	return NewRedisRepository(redis.NewClient(&redis.Options{
-		Addr:     "redis-master:6379",
-		//Addr: "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	}))
-
-}
-
-
-func WriteKeyHandler(w http.ResponseWriter, r *http.Request) {
-
-	log.Println("Connecting to Redis")
-	rdb := RedisConnection()
-
-	keyvalue := r.Context().Value(KeyValue{}).(*KeyValue)
-
-	err := rdb.Set(keyvalue.Key, keyvalue.Value, 0)
-	if err != nil {
-		panic(err)
-	}
-
-	val, err := rdb.Get("key")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("key", val)
+type Env struct {
+	DataSource data.DataAccess
 }
 
 func getFileSystem() http.FileSystem{
@@ -144,30 +93,10 @@ func getFileSystem() http.FileSystem{
 }
 
 
-func FetchKeyHandler(w http.ResponseWriter, r *http.Request) {
-
-	vars := mux.Vars(r)
-
-	key, err := vars["key"]
-
-	if err != true {
-		http.Error(w, "Invalid request", http.StatusBadRequest)
-	}
-
-	log.Printf("Fetching key %s" , key)
-
-	val, err1 := RedisConnection().Get(key)
-	if err1 != nil {
-		panic(err1)
-	}
-
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, "Requested value ", val)
-}
-
 func StartServer() {
 
 	log.Printf("Staring server on port %d ", PORT )
+
 	sm := mux.NewRouter()
 	sm.Use(PrometheusMiddleWare)
 
@@ -180,12 +109,11 @@ func StartServer() {
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
 	getRouter.Handle("/", http.FileServer(getFileSystem()))
 
-
 	getKeyRouter := sm.Methods(http.MethodGet).Subrouter()
-	getKeyRouter.HandleFunc("/value/{key}", FetchKeyHandler)
+	getKeyRouter.HandleFunc("/value/{key}", handlers.FetchKeyHandler)
 
 	writeKeyRouter := sm.Methods(http.MethodPost).Subrouter()
-	writeKeyRouter.HandleFunc("/keyvalue", WriteKeyHandler)
+	writeKeyRouter.HandleFunc("/keyvalue", handlers.WriteKeyHandler)
 	writeKeyRouter.Use(MiddleWareProductValidation)
 
 	//CORS header
@@ -219,14 +147,10 @@ func StartServer() {
 
 }
 
-type KeyValue struct {
-	Key string `json:"key"`
-	Value string `json:"value"`
-}
+
 
 func PrometheusMiddleWare(next http.Handler) http.Handler{
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request){
-
 		route := mux.CurrentRoute(r)
 		path, _ := route.GetPathTemplate()
 
@@ -245,6 +169,7 @@ func init(){
 	prometheus.Register(totalRequests)
 	prometheus.Register(responseStatus)
 	prometheus.Register(httpDuration)
+
 }
 
 type responseWriter struct {
@@ -261,7 +186,7 @@ func MiddleWareProductValidation(next http.Handler) http.Handler{
 
 	return http.HandlerFunc(func(rw http.ResponseWriter, r*http.Request) {
 
-		keyVal := &KeyValue{}
+		keyVal := &data.KeyValue{}
 
 		e := json.NewDecoder(r.Body)
 		err := e.Decode(keyVal)
@@ -273,12 +198,12 @@ func MiddleWareProductValidation(next http.Handler) http.Handler{
 		}
 
 		// add key value to the context
-		ctx := context.WithValue(r.Context(), KeyValue{}, keyVal)
+		ctx := context.WithValue(r.Context(), data.KeyValue{}, keyVal)
 		req := r.WithContext(ctx)
 
 
 
-		// call the next handler, which can be another middleware in the chain, or the final handler
+		// cGall the next handler, which can be another middleware in the chain, or the final handler
 		next.ServeHTTP(rw,req)
 
 	})
