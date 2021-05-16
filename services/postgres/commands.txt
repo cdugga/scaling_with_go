@@ -1,0 +1,20 @@
+# commands
+https://www.postgresqltutorial.com/psql-commands/
+
+# login
+psql -d database -U  user -W
+
+# list all databases
+\l
+
+# list tables
+\dt
+
+# describe table
+\d <tablename>
+
+# list users and roles
+\du
+
+# get help
+\h d

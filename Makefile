@@ -4,7 +4,7 @@ build_postgres_image:
 	cd services/postgres; \
 	docker build -t cdugga/scaling-with-go-postgres:1.0.0 .
 start_postgres_image:
-	docker run -p 5432:5432 -e POSTGRES_PASSWORD=admin -it cdugga/scaling-with-go-postgres:1.0.0 ;
+	docker run -p 5432:5432 -d -e POSTGRES_USER=docker -e POSTGRES_PASSWORD=docker -e POSTGRES_DB=docker -it cdugga/scaling-with-go-postgres:1.0.0 ;
 build_server_image:
 	cd services/server/src; \
 	go mod init github.com/cdugga/scaling_with_go/server ;\
