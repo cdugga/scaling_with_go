@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/cdugga/user-service-go/env"
 	"github.com/gorilla/mux"
-	"github.com/rajesh4295/user-service-go/env"
 )
 
 type MuxRouter struct {
@@ -35,6 +35,7 @@ func (mx *MuxRouter) RegisterSubRoute(path string) Router {
 }
 
 func (mx *MuxRouter) Serve() {
+	fmt.Println("sdasdas", Env.Get("HOST"))
 	fmt.Printf("Server starting on %v:%v", Env.Get("HOST"), Env.Get("PORT"))
 	fmt.Println()
 	log.Fatal(http.ListenAndServe(fmt.Sprintf("%v:%v", Env.Get("HOST"), Env.Get("PORT")), mx.router))

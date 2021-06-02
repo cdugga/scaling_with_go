@@ -1,7 +1,7 @@
 {
   "ENV": "dev",
-  "HOST": "127.0.0.1",
-  "PORT": 4000,
+  "HOST": "localhost",
+  "PORT": 8080,
   "DB": {
     "HOST": "localhost",
     "PORT": "5432",
