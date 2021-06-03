@@ -33,8 +33,7 @@ func NewLocService() LocationService {
 
 func (s *locService) GetLocationById(place string) ([]byte, error) {
 
-	//apiPath := Env.Get(API_PATH_KEY)
-	apiPath := "https://www.googleapis.com/books/v1/"
+	apiPath := Env.Get(API_PATH_KEY)
 	url := fmt.Sprintf("%svolumes?q=book+intitle:%s&maxResults=1", apiPath, place)
 
 	request, err := http.NewRequest(http.MethodGet, url, nil)
