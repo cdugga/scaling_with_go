@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/cdugga/bookmark/env"
 	chttp "github.com/cdugga/bookmark/http"
 	"io"
 	"net/http"
@@ -11,8 +12,13 @@ type LocationService interface {
 	GetLocationById(place string) ([]byte, error)
 }
 
+const (
+	API_PATH_KEY="GOOGLE_BOOKS_API"
+)
+
 var (
 	HttpClient = chttp.Client
+	Env env.Provider = env.NewEnv()
 )
 
 /*
@@ -27,7 +33,9 @@ func NewLocService() LocationService {
 
 func (s *locService) GetLocationById(place string) ([]byte, error) {
 
-	url := fmt.Sprintf("https://www.googleapis.com/books/v1/volumes?q=book+intitle:%s&maxResults=1", place)
+	//apiPath := Env.Get(API_PATH_KEY)
+	apiPath := "https://www.googleapis.com/books/v1/"
+	url := fmt.Sprintf("%svolumes?q=book+intitle:%s&maxResults=1", apiPath, place)
 
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
