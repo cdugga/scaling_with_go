@@ -1,11 +1,13 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"github.com/cdugga/bookmark/env"
 	chttp "github.com/cdugga/bookmark/http"
 	"io"
 	"net/http"
+	"time"
 )
 
 type LocationService interface {
@@ -40,6 +42,11 @@ func (s *locService) GetLocationById(place string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("get %s failed : %v", url, err)
 	}
+
+	// set a per request timeout 15 seconds
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 15)
+	defer cancel()
+	request = request.WithContext(ctx)
 
 	resp, err := HttpClient.Do(request)
 	if err != nil{

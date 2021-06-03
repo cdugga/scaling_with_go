@@ -1,11 +1,15 @@
 package http
 
 import (
+	"context"
 	"fmt"
 	"github.com/cdugga/bookmark/env"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"time"
 )
 
 type MuxRouter struct {
@@ -34,8 +38,40 @@ func (mx *MuxRouter) RegisterSubRoute(path string) Router {
 }
 
 func (mx *MuxRouter) Serve() {
-	fmt.Println("Starting host..", Env.Get("HOST"))
-	fmt.Printf("Server starting on %v:%v", Env.Get("HOST"), Env.Get("PORT"))
-	fmt.Println()
-	log.Fatal(http.ListenAndServe(fmt.Sprintf("%v:%v", Env.Get("HOST"), Env.Get("PORT")), mx.router))
+
+
+	s := http.Server{
+		Addr: ":8080",
+		Handler:  mx.router,
+		IdleTimeout: 120*time.Second,
+		ReadTimeout: 5 *time.Second,
+		WriteTimeout: 10*time.Second,
+	}
+
+	go func() {
+		fmt.Println("Starting host..", Env.Get("HOST"))
+		fmt.Printf("Server starting on %v:%v", Env.Get("HOST"), Env.Get("PORT"))
+		fmt.Println()
+
+		err := s.ListenAndServe()
+		if err != nil {
+			log.Fatal("Error starting server on port 8080")
+			os.Exit(1)
+		}
+
+	}()
+
+	// trap sigterm or interupt and gracefully shutdown the server
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	signal.Notify(c, os.Kill)
+
+	// Block until a signal is received.
+	sig := <-c
+	log.Println("Got signal:", sig)
+
+	// gracefully shutdown the server, waiting max 30 seconds for current operations to complete
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	s.Shutdown(ctx)
+
 }

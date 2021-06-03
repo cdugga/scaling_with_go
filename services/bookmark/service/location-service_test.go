@@ -16,7 +16,7 @@ func init() {
 	HttpClient = &mocks.MockClient{} // override HttpClient instance
 }
 
-func TestGetLocationByIdSuccess(t *testing.T){
+func TestRequestSuccess(t *testing.T){
 
 	// make sure to reset original func once completed
 	savedEnv := Env
@@ -51,7 +51,7 @@ func TestGetLocationByIdSuccess(t *testing.T){
 }
 
 
-func TestGetLocationByIdFailureNewRequest(t *testing.T) {
+func TestNewRequestCreationFailure(t *testing.T) {
 
 	// make sure to reset original func once completed
 	savedEnv := Env
@@ -67,7 +67,7 @@ func TestGetLocationByIdFailureNewRequest(t *testing.T) {
 	mocks.GetDoFunc = func(*http.Request) (*http.Response, error) {
 		r := ioutil.NopCloser(bytes.NewReader([]byte(jsonStr)))
 		return &http.Response{
-			StatusCode: 200,
+			StatusCode: 500,
 			Body:       r,
 		}, nil
 	}
@@ -75,7 +75,57 @@ func TestGetLocationByIdFailureNewRequest(t *testing.T) {
 	location := NewLocService()
 	_, err := location.GetLocationById("someLoc")
 
-	fmt.Println(err)
+	assert.NotNil(t, err)
+}
+
+func TestHttpClientDoFailure(t *testing.T) {
+	// make sure to reset original func once completed
+	savedEnv := Env
+	defer func() { Env = savedEnv}()
+	Env = &mocks.MockEnv{}
+
+	//  returns supplied val
+	mocks.GetFunc = func(key string) interface{} {
+		return "https://www.googleapis.com/books/v1/"
+	}
+	jsonStr := `{}`
+	mocks.GetDoFunc = func(*http.Request) (*http.Response, error) {
+		r := ioutil.NopCloser(bytes.NewReader([]byte(jsonStr)))
+		return &http.Response{
+			StatusCode: 500,
+			Body:       r,
+		}, fmt.Errorf("HttpClient request failed")
+	}
+
+	location := NewLocService()
+	_, err := location.GetLocationById("rockwood")
+
 	assert.NotNil(t, err)
 
+}
+
+func TestUTFEncoding(t *testing.T) {
+
+	// make sure to reset original func once completed
+	savedEnv := Env
+	defer func() { Env = savedEnv}()
+	Env = &mocks.MockEnv{}
+
+	//  returns supplied val
+	mocks.GetFunc = func(key string) interface{} {
+		return "https://www.googleapis.com/books/v1/"
+	}
+	jsonStr := `λ**%&^$^%()&)(*&_)*)_*(*^^&£^$%^$*&&)*_)*(*_)(*`
+	mocks.GetDoFunc = func(*http.Request) (*http.Response, error) {
+		r := ioutil.NopCloser(bytes.NewReader([]byte(jsonStr)))
+		return &http.Response{
+			StatusCode: 500,
+			Body: r,
+		}, nil
+	}
+
+	location := NewLocService()
+	_, err := location.GetLocationById("rockwood")
+
+	assert.Nil(t, err)
 }
