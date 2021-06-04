@@ -11,7 +11,7 @@ import (
 )
 
 type LocationService interface {
-	GetLocationById(place string) ([]byte, error)
+	GetLocationById(place string, maxResults int) ([]byte, error)
 }
 
 const (
@@ -33,10 +33,10 @@ func NewLocService() LocationService {
 	return &locService{}
 }
 
-func (s *locService) GetLocationById(place string) ([]byte, error) {
+func (s *locService) GetLocationById(place string, maxResults int) ([]byte, error) {
 
 	apiPath := Env.Get(API_PATH_KEY)
-	url := fmt.Sprintf("%svolumes?q=book+intitle:%s&maxResults=1", apiPath, place)
+	url := fmt.Sprintf("%svolumes?q=book+intitle:%s&maxResults=%d", apiPath, place, maxResults)
 
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {

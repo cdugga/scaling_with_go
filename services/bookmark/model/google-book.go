@@ -31,17 +31,17 @@ type Pdf struct {
 type Accessinfo struct {
 	Country                string `json:"country"`
 	Viewability            string `json:"viewability"`
-	Embeddable             bool   `json:"embeddable"`
-	Publicdomain           bool   `json:"publicDomain"`
+	Embeddable             bool   `json:"-"`
+	Publicdomain           bool   `json:"-"`
 	Texttospeechpermission string `json:"textToSpeechPermission"`
 	Epub                   Epub   `json:"epub"`
-	Pdf                    Pdf    `json:"pdf"`
+	Pdf                    Pdf    `json:"-"`
 	Webreaderlink          string `json:"webReaderLink"`
-	Accessviewstatus       string `json:"accessViewStatus"`
-	Quotesharingallowed    bool   `json:"quoteSharingAllowed"`
+	Accessviewstatus       string `json:"-"`
+	Quotesharingallowed    bool   `json:"-"`
 }
 type Searchinfo struct {
-	Textsnippet string `json:"textSnippet"`
+	Textsnippet string `json:"-"`
 }
 type Panelizationsummary struct {
 	Containsepubbubbles  bool `json:"containsEpubBubbles"`
@@ -86,15 +86,15 @@ type Volumeinfo struct {
 	Publisheddate       string                `json:"publishedDate"`
 	Description         string                `json:"description"`
 	Industryidentifiers []Industryidentifiers `json:"industryIdentifiers"`
-	Readingmodes        Readingmodes          `json:"readingModes"`
+	Readingmodes        Readingmodes          `json:"-"`
 	Pagecount           int                   `json:"pageCount"`
 	Printtype           string                `json:"printType"`
 	Categories          []string              `json:"categories"`
 	Maturityrating      string                `json:"maturityRating"`
 	Allowanonlogging    bool                  `json:"allowAnonLogging"`
 	Contentversion      string                `json:"contentVersion"`
-	Panelizationsummary Panelizationsummary   `json:"panelizationSummary"`
-	Imagelinks          Imagelinks            `json:"imageLinks"`
+	Panelizationsummary Panelizationsummary   `json:"-"`
+	Imagelinks          Imagelinks            `json:"-"`
 	Language            string                `json:"language"`
 	Previewlink         string                `json:"previewLink"`
 	Infolink            string                `json:"infoLink"`

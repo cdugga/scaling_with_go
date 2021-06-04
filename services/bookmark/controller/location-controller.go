@@ -2,25 +2,36 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/cdugga/bookmark/model"
 	"github.com/cdugga/bookmark/service"
 	"github.com/gorilla/mux"
 	"net/http"
+	"strconv"
 )
 
 var (
 	locSVC service.LocationService = service.NewLocService()
 )
 
-func GetOrgById(w http.ResponseWriter, r *http.Request) {
+func GetOrgByIdAndParam(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	place := params["id"]
+	place := params["locationId"]
+	queryParam := params["maxResults"]
+
+	var numResults int = 0
+	if queryParam == "" {
+		numResults = 1
+	}else {
+		numResults, _ = strconv.Atoi(queryParam)
+	}
+	fmt.Println("Results..", numResults)
 
 	var googlebook model.GoogleBook
 	var location []byte
 	var err error
 
-	if location, err = locSVC.GetLocationById(place); err != nil {
+	if location, err = locSVC.GetLocationById(place, numResults); err != nil {
 		RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -33,6 +44,29 @@ func GetOrgById(w http.ResponseWriter, r *http.Request) {
 	RespondWithJSON(w, http.StatusOK, googlebook)
 
 }
+
+
+//func GetOrgById(w http.ResponseWriter, r *http.Request) {
+//	params := mux.Vars(r)
+//	place := params["locationId"]
+//
+//	var googlebook model.GoogleBook
+//	var location []byte
+//	var err error
+//
+//	if location, err = locSVC.GetLocationById(place); err != nil {
+//		RespondWithError(w, http.StatusInternalServerError, err.Error())
+//		return
+//	}
+//
+//	if err:= json.Unmarshal(location, &googlebook); err != nil {
+//		RespondWithError(w, http.StatusInternalServerError, err.Error())
+//		return
+//	}
+//
+//	RespondWithJSON(w, http.StatusOK, googlebook)
+//
+//}
 
 func RespondWithError(w http.ResponseWriter, code int, message string) {
 	RespondWithJSON(w, code, map[string]string{"error": message})

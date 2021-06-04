@@ -28,6 +28,10 @@ func (mx *MuxRouter) Get(url string, f func(w http.ResponseWriter, r *http.Reque
 	mx.router.HandleFunc(url, f).Methods("GET")
 }
 
+func (mx *MuxRouter) GetWithQueryParams(url string, f func(w http.ResponseWriter, r *http.Request), queryParam string) {
+	mx.router.HandleFunc(url, f).Queries(queryParam, "{"+queryParam+"}").Methods("GET")
+}
+
 func (mx *MuxRouter) Post(url string, f func(w http.ResponseWriter, r *http.Request)) {
 	mx.router.HandleFunc(url, f).Methods("POST")
 }
