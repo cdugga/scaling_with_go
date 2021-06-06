@@ -15,6 +15,7 @@ func main(){
 	initApp()
 	initRoutes()
 	mainRouter.Serve()
+
 }
 
 func initApp() {
@@ -23,5 +24,5 @@ func initApp() {
 }
 
 func initRoutes() {
-	mainRouter.GetWithQueryParams("/booksT/{locationId}", controller.GetOrgByIdAndParam, "maxResults")
+	mainRouter.Get("/books/{locationId}", controller.GetBooksByLocation)
 }

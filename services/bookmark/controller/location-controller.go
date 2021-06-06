@@ -14,10 +14,17 @@ var (
 	locSVC service.LocationService = service.NewLocService()
 )
 
-func GetOrgByIdAndParam(w http.ResponseWriter, r *http.Request) {
+const (
+	LOCATION_ID = "locationId"
+	MAX_RESULTS = "maxResults"
+)
+
+func GetBooksByLocation(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	place := params["locationId"]
-	queryParam := params["maxResults"]
+	place := params[LOCATION_ID]
+
+	q := r.URL.Query()
+	queryParam := q.Get(MAX_RESULTS)
 
 	var numResults int = 0
 	if queryParam == "" {
@@ -25,6 +32,7 @@ func GetOrgByIdAndParam(w http.ResponseWriter, r *http.Request) {
 	}else {
 		numResults, _ = strconv.Atoi(queryParam)
 	}
+
 	fmt.Println("Results..", numResults)
 
 	var googlebook model.GoogleBook
@@ -40,33 +48,9 @@ func GetOrgByIdAndParam(w http.ResponseWriter, r *http.Request) {
 		RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
 	RespondWithJSON(w, http.StatusOK, googlebook)
-
 }
 
-
-//func GetOrgById(w http.ResponseWriter, r *http.Request) {
-//	params := mux.Vars(r)
-//	place := params["locationId"]
-//
-//	var googlebook model.GoogleBook
-//	var location []byte
-//	var err error
-//
-//	if location, err = locSVC.GetLocationById(place); err != nil {
-//		RespondWithError(w, http.StatusInternalServerError, err.Error())
-//		return
-//	}
-//
-//	if err:= json.Unmarshal(location, &googlebook); err != nil {
-//		RespondWithError(w, http.StatusInternalServerError, err.Error())
-//		return
-//	}
-//
-//	RespondWithJSON(w, http.StatusOK, googlebook)
-//
-//}
 
 func RespondWithError(w http.ResponseWriter, code int, message string) {
 	RespondWithJSON(w, code, map[string]string{"error": message})
@@ -74,7 +58,6 @@ func RespondWithError(w http.ResponseWriter, code int, message string) {
 
 func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, _ := json.Marshal(payload)
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	w.Write(response)

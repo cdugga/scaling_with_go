@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"time"
@@ -42,8 +43,6 @@ func (mx *MuxRouter) RegisterSubRoute(path string) Router {
 }
 
 func (mx *MuxRouter) Serve() {
-
-
 	s := http.Server{
 		Addr: ":8080",
 		Handler:  mx.router,
@@ -64,6 +63,8 @@ func (mx *MuxRouter) Serve() {
 		}
 
 	}()
+
+	mx.router.PathPrefix("/debug/").Handler(http.DefaultServeMux)
 
 	// trap sigterm or interupt for gracefully shutdown the server
 	c := make(chan os.Signal, 1)
